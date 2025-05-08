@@ -15,6 +15,8 @@ import StorageListener from '../public/storageListener';
 import EventList from './pages/EventList';
 import UserProfile from './pages/UserProfile';
 import UserEvents from './pages/UserEvents';
+import EventDetails from './pages/EventDetails';
+import EditEvent from './pages/EditEvent';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
           <Route path="/events" element={<EventList />} /> 
           <Route path="/profile" element={<UserProfile />} /> 
           <Route path="/added-events" element={<UserEvents />} /> 
+          <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/edit-event/:id" element={<EditEvent />} />
           <Route
             path="/add-event"
             element={

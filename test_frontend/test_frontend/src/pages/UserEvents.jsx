@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Button } from "react-bootstrap";
 
 function UserEvents() {
   const [events, setEvents] = useState([]);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserEvents = async () => {
@@ -20,6 +23,23 @@ function UserEvents() {
 
     fetchUserEvents();
   }, [user]);
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/events/${id}`);
+        setEvents((prev) => prev.filter((event) => event._id !== id));
+        alert("Event deleted successfully!");
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert("Failed to delete event");
+      }
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/edit-event/${id}`);
+  };
 
   if (!user) {
     return <div className="text-center py-5"><p>Please sign in to view your events.</p></div>;
@@ -49,6 +69,10 @@ function UserEvents() {
                 <p className="card-text"><strong>Date:</strong> {event.date}</p>
                 <p className="card-text"><strong>Venue:</strong> {event.venue}</p>
                 <p className="card-text">{event.description}</p>
+              </div>
+              <div className="card-footer d-flex justify-content-between">
+                <Button variant="warning" onClick={() => handleEdit(event._id)}>Edit</Button>
+                <Button variant="danger" onClick={() => handleDelete(event._id)}>Delete</Button>
               </div>
             </div>
           </div>

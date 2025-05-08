@@ -3,49 +3,52 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");  // Required to check and create directory
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
 
-// Middleware
+// ---------- MIDDLEWARE ----------
 app.use(cors());
 app.use(express.json()); 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files from 'uploads'
+
+// Serve static files from 'uploads' folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Ensure 'uploads' directory exists
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir); // Create 'uploads' folder if it doesn't exist
+  fs.mkdirSync(uploadDir);
 }
 
-// Set up multer storage for image uploads
+// ---------- MULTER SETUP FOR IMAGE UPLOAD ----------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);  // Store images in the 'uploads' folder
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));  // Save the file with a unique name
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
+const upload = multer({ storage });
 
-const upload = multer({ storage: storage });
-
-// MongoDB Connection
+// ---------- MONGODB CONNECTION ----------
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("MongoDB connection error:", err));
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Import Models
+// ---------- MODELS ----------
 const User = require('./models/User');
 const Product = require('./models/Product');
-const Event = require('./models/Event')
+const Event = require('./models/Event');
 
-// User Routes
+// ========== USER ROUTES ==========
+
+// Sign Up
 app.post('/api/signup', async (req, res) => {
   try {
-    const {name, email, password } = req.body;
-    const newUser = new User({uid, name, email, password });
+    const { name, email, password } = req.body;
+    const newUser = new User({ name, email, password });
     await newUser.save();
     console.log("New User Saved:", newUser);
     res.status(201).json({ message: "Signup successful" });
@@ -55,45 +58,33 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// Sign In Route
+// Sign In
 app.post('/api/signin', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Find the user by email
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      // Simple password check (you should hash passwords in real apps)
-      if (user.password !== password) {
-        return res.status(400).json({ message: "Invalid credentials" });
-      }
-  
-      res.json({ message: "Login successful", user });
-    } catch (error) {
-      console.error("Error during signin:", error);
-      res.status(500).json({ message: "Signin failed", error: error.message });
-    }
-  });
-  
-// Product Routes
-// Create Product Route (with Image Upload)
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.password !== password) return res.status(400).json({ message: "Invalid credentials" });
+
+    res.json({ message: "Login successful", user });
+  } catch (error) {
+    console.error("Error during signin:", error);
+    res.status(500).json({ message: "Signin failed", error: error.message });
+  }
+});
+
+// ========== PRODUCT ROUTES ==========
+
+// Create Product
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
     const { name, price, description } = req.body;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;  // Get image URL
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const newProduct = new Product({
-      name,
-      price,
-      description,
-      imageUrl,
-    });
-
+    const newProduct = new Product({ name, price, description, imageUrl });
     await newProduct.save();
+
     res.status(201).json({ message: "Product created successfully" });
   } catch (error) {
     console.error("Error creating product:", error);
@@ -101,7 +92,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   }
 });
 
-// Get all products
+// Get All Products
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -112,13 +103,11 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// Get a single product by ID
+// Get Single Product
 app.get('/api/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -126,60 +115,82 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// Delete Product Route
+// Delete Product
 app.delete('/api/products/:id', async (req, res) => {
-    try {
-      const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-      if (!deletedProduct) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      res.json({ message: "Product deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      res.status(500).json({ message: "Failed to delete product", error: error.message });
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) return res.status(404).json({ message: "Product not found" });
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Failed to delete product", error: error.message });
+  }
+});
+
+// ========== EVENT ROUTES ==========
+
+// Create Event
+app.post('/api/events', upload.single('banner'), async (req, res) => {
+  try {
+    const { title, date, venue, description, userEmail } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const newEvent = new Event({ title, date, venue, description, imageUrl, userEmail });
+    await newEvent.save();
+
+    res.status(201).json({ message: "Event added successfully" });
+  } catch (error) {
+    console.error("Error adding event:", error);
+    res.status(500).json({ message: "Failed to create event", error: error.message });
+  }
+});
+
+// Get Events (Optionally filter by userEmail)
+app.get('/api/events', async (req, res) => {
+  try {
+    const { userEmail } = req.query;
+    const filter = userEmail ? { userEmail } : {};
+    const events = await Event.find(filter);
+    res.json(events);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ message: "Fetching events failed", error: error.message });
+  }
+});
+
+app.get('/api/events/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching event", error: error.message });
+  }
+});
+
+app.put("/api/events/:id", async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: "Event not found" });
     }
-  });
 
-  //Event Posting
+    res.status(200).json(updatedEvent);
+  } catch (error) {
+    console.error("Error updating event:", error);
+    res.status(500).json({ message: "Failed to update event", error });
+  }
+});
 
-  app.post('/api/events', upload.single('banner'), async (req, res) => {
-    try {
-      console.log("Received form data:", req.body);
-      console.log("Received file:", req.file);
-  
-      const { title, date, venue, description, userEmail } = req.body;
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-  
-      const newEvent = new Event({
-        title,
-        date,
-        venue,
-        description,
-        imageUrl,
-        userEmail,
-      });
-  
-      await newEvent.save();
-      res.status(201).json({ message: "Event added successfully" });
-    } catch (error) {
-      console.error("Error adding event:", error);  // Will show the error in terminal
-      res.status(500).json({ message: "Failed to create event", error: error.message });
-    }
-  });
 
-  
-  app.get('/api/events', async (req, res) => {
-    try {
-      const events = await Event.find();
-      res.json(events);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Fetching events failed", error: error.message });
-    }
-  });
-  
-
-// Start Server
+// ========== START SERVER ==========
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

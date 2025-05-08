@@ -4,8 +4,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Container, Form, Button, Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,6 +28,7 @@ function SignUp() {
       await axios.post('http://localhost:5000/api/signup', formData);
       alert("User registered successfully!");
       setFormData({ name: "", email: "", password: "" });
+      navigate('/login')
     } catch (err) {
       console.error("Error registering user:", err);
       alert(err.response?.data?.message || "Failed to register user.");

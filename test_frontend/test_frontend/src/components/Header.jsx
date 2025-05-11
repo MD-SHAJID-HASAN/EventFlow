@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Nav, Navbar, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Header() {
@@ -12,26 +12,33 @@ function Header() {
     navigate("/login");
   };
 
+  const linkStyle = ({ isActive }) => ({
+    color: isActive ? "#fff" : "#000",
+    fontWeight: isActive ? "bold" : "normal",
+    textDecoration: "none",
+    marginRight: "1rem",
+  });
+
   return (
-    <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
+    <Navbar collapseOnSelect expand="lg" className="bg-info">
       <Container>
-        <Navbar.Brand as={Link} to="/">EventFlow</Navbar.Brand>
+        <Navbar.Brand as={NavLink} to="/" style={linkStyle}>EventFlow</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
-           
-            
-            <Nav.Link as={Link} to="/add-event">Add Event</Nav.Link>
-            <Nav.Link as={Link} to="/events">Events</Nav.Link>
+            <NavLink to="/add-event" style={linkStyle}>Add Event</NavLink>
+            <NavLink to="/events" style={linkStyle}>Events</NavLink>
           </Nav>
           <Nav>
             {user ? (
               <>
-                <Navbar.Text className="me-3">Welcome <Link className="text-decoration-none" to='/profile'><strong>{user.name || user.email}</strong></Link></Navbar.Text>
+                <Navbar.Text className="me-3">
+                  Welcome <NavLink to="/profile" style={linkStyle}><strong>{user.name || user.email}</strong></NavLink>
+                </Navbar.Text>
                 <Button variant="outline-danger" onClick={handleLogout}>Log Out</Button>
               </>
             ) : (
-              <Nav.Link as={Link} to="/login">Sign In</Nav.Link>
+              <NavLink to="/login" style={linkStyle}>Sign In</NavLink>
             )}
           </Nav>
         </Navbar.Collapse>

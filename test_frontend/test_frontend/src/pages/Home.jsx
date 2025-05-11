@@ -95,16 +95,24 @@ const Home = () => {
         )}
       </Container>
 
+            {/* Call to Action */}
+            <Container className="text-center my-5">
+        <h3 className="mb-3">Want to explore more events?</h3>
+        <Button as={Link} to="/events" variant="primary" size="lg">
+          Browse All Events
+        </Button>
+      </Container>
+
       {/* Why Choose Us */}
+      <h2 className="text-center mb-4 fw-bold">Our Specialities</h2>
       <Container className="my-5">
-        <h2 className="text-center mb-4 fw-bold">🚀 Why Choose Our Platform?</h2>
         <Row className="g-4">
           <Col md={4}>
             <Card className="h-100 text-center shadow-sm border-0">
               <Card.Body>
                 <Card.Title>Easy Event Discovery</Card.Title>
                 <Card.Text>
-                  Quickly explore events by category, date, or location.
+                  Quickly explore events by name, venue or description.
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -132,13 +140,7 @@ const Home = () => {
         </Row>
       </Container>
 
-      {/* Call to Action */}
-      <Container className="text-center my-5">
-        <h3 className="mb-3">Want to explore more events?</h3>
-        <Button as={Link} to="/events" variant="primary" size="lg">
-          Browse All Events
-        </Button>
-      </Container>
+
     </>
   );
 };

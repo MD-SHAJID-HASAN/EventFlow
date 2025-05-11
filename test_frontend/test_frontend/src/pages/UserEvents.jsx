@@ -68,7 +68,7 @@ function UserEvents() {
                 <h5 className="card-title">{event.title}</h5>
                 <p className="card-text"><strong>Date:</strong> {event.date}</p>
                 <p className="card-text"><strong>Venue:</strong> {event.venue}</p>
-                <p className="card-text">{event.description}</p>
+                <p className="card-text" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.description}</p>
               </div>
               <div className="card-footer d-flex justify-content-between">
                 <Button variant="warning" onClick={() => handleEdit(event._id)}>Edit</Button>

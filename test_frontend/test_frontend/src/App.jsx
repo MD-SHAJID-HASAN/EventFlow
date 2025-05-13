@@ -17,6 +17,7 @@ import UserProfile from './pages/UserProfile';
 import UserEvents from './pages/UserEvents';
 import EventDetails from './pages/EventDetails';
 import EditEvent from './pages/EditEvent';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
           />
           <Route path="/products" element={<ProductList />} />
         </Routes>
+        <Footer></Footer>
       </Router>
     </AuthProvider>
   );

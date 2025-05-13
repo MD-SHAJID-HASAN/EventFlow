@@ -73,7 +73,7 @@ function EventList() {
               />
               <Card.Body>
                 <Card.Title>{event.title}</Card.Title>
-                <Card.Text>{event.description}</Card.Text>
+                <Card.Text  style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.description}</Card.Text>
                 <Card.Text><strong>Date:</strong> {event.date}</Card.Text>
                 <Card.Text><strong>Venue:</strong> {event.venue}</Card.Text>
                 <div className="d-flex justify-content-between">

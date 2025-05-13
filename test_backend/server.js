@@ -189,6 +189,23 @@ app.put("/api/events/:id", async (req, res) => {
   }
 });
 
+app.delete('/api/events/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedEvent = await Event.findByIdAndDelete(id);
+
+    if (!deletedEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.status(200).json({ message: "Event deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 // ========== START SERVER ==========
 const PORT = process.env.PORT || 5000;
